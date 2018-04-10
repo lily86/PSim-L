@@ -9,10 +9,11 @@
 
 Fetch_reg fetch(Insn_data_memory &mem, uint32_t &PC, uint32_t &PC_DISP, uint8_t &PC_R) {	
 	Fetch_reg return_reg;
-	if (PC_R) PC = PC + PC_DISP / 4;
-	else PC = PC + 1;
 
 	return_reg.set_reg(mem.get_instruction(PC));
+	if (PC_R) PC = PC + PC_DISP / 4;
+	else PC = PC + 1;
+	
 	return return_reg;
 }
 
@@ -21,8 +22,7 @@ Decode_reg decode(Fetch_reg &reg, Regfile &obj)  {
 	struct CU_signals CU;
 	//initialize control unit depend from instruction
 	CU = control_unit(reg.get_reg());
-	Decode_reg return_reg;
-
+	
 	uint8_t	rs1 = get_bits(reg.get_reg(), 15, 5);
 	uint8_t	rs2 = get_bits(reg.get_reg(), 20, 5);
 	uint8_t	rd = get_bits(reg.get_reg(), 7, 5);
@@ -33,7 +33,7 @@ Decode_reg decode(Fetch_reg &reg, Regfile &obj)  {
 	uint32_t rs1_val = obj.get_register(rs1);
 	uint32_t rs2_val = obj.get_register(rs2);
 
-	return_reg.set_reg(CU, rs1, rs2, rs1_val, rs2_val, rd, imm1, sgn);
+	Decode_reg return_reg(CU, rs1, rs2, rs1_val, rs2_val, rd, imm1, sgn);
 	return return_reg;
 }
 
@@ -67,9 +67,10 @@ Execute_reg execute(Decode_reg &reg, uint32_t &PC_DISP, uint8_t &PC_R) {
 	return return_reg;
 }
 
-Memory_reg memory(Execute_reg &reg, Insn_data_memory &mem) {	
+Memory_reg memory(Execute_reg &reg, Insn_data_memory &mem, uint32_t &BP_EX) {	
 	CU_signals get_CU = reg.get_CU_reg();
 	uint32_t get_alu_result = reg.ALUresult_reg();
+	BP_EX = reg.ALUresult_reg();
 	uint32_t RS1_val = reg.rs1_val_reg();
 	uint8_t mux_mem1 = get_CU.mux_mem1;
 
@@ -86,10 +87,11 @@ Memory_reg memory(Execute_reg &reg, Insn_data_memory &mem) {
 	return return_reg;	
 }
 
-void write_back(Memory_reg &reg, Regfile &regfile) {
+void write_back(Memory_reg &reg, Regfile &regfile, uint32_t &BP_MEM) {
 	CU_signals get_CU = reg.get_CU_reg();
 	uint8_t WB_WE_signal = get_CU.WB_WE;
 	uint32_t WB_D = reg.mux_res();
+	BP_MEM = reg.mux_res();
 	uint8_t WB_A = reg.RD_reg();
 
 	if (WB_WE_signal) regfile.set_register(WB_A, WB_D);
