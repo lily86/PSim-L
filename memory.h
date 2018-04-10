@@ -5,7 +5,7 @@
 #include <vector>
 #include <bitset>
 
-uint32_t multiplexor4(uint8_t rs1_addr, uint16_t imm1, uint32_t imm2, uint8_t RD, uint8_t mux_ex_signal);
+uint32_t multiplexor4(uint32_t rs2_val, uint16_t imm1, uint32_t imm2, uint32_t rd, uint8_t mux_ex); // зачем RD ???
 int8_t multiplexor(int8_t lorD);
 uint32_t get_bits(uint32_t insn, unsigned int pos, unsigned int n);
 int32_t sign_extend(uint32_t insn);
@@ -21,14 +21,13 @@ struct CU_signals {
 
 	CU_signals() {}
 
-	void set_sginals(uint8_t WB_WE_val, uint8_t MEM_WE_val, uint8_t mux_ex1_val,
-		uint8_t AluOp_val, uint8_t mux_mem1_val, uint8_t conditional_val);
+	void set_sginals(uint8_t WB_WE_, uint8_t MEM_WE_, uint8_t mux_ex1_,
+					 uint8_t AluOp_, uint8_t mux_mem1_, uint8_t conditional_);
 
 	void print_CU_signals();
 };
 
 struct CU_signals control_unit(uint32_t insn);
-
 //-------------------------------------------------------------------------------------------------------
 // TEMPORARY REGISTERS:
 
@@ -36,7 +35,7 @@ class Fetch_reg {
 	uint32_t reg;
 
 public:
-	void set_reg(uint32_t val) { reg = val; }
+	Fetch_reg(uint32_t val) { reg = val; }
 	uint32_t get_reg() { return reg; }
 
 	void print_reg();
@@ -44,45 +43,44 @@ public:
 
 class Decode_reg {
 	CU_signals CU_reg;
-	uint8_t RS1;
-	uint8_t RS2;
-	uint32_t RS1_val;
-	uint32_t RS2_val;
+	uint8_t rs1;
+	uint8_t rs2;
+	uint32_t rs1_val;
+	uint32_t rs2_val;
 	uint16_t imm1; //from 20 to 30
 	uint32_t imm2; //31
-	uint8_t RD;
+	uint8_t rd;
 
 public:
-	Decode_reg(CU_signals CU_reg_val, uint8_t RS1_v, uint8_t RS2_v, uint32_t RS1_vv, uint32_t RS2_vv, uint8_t RD_v, uint16_t imm1_val, uint32_t imm2_val);
+	Decode_reg(CU_signals CU_reg_, uint8_t rs1_, uint8_t rs2_, uint32_t rs1_val_, 
+			   uint32_t rs2_val_, uint8_t rd_, uint16_t imm1_, uint32_t imm2_);
 
 	CU_signals get_CU_reg() { return CU_reg; }	
-	uint8_t RS1_reg() { return RS1; }	
-	uint8_t RS2_reg() { return RS2; }
-	uint32_t RS1_val_reg() { return RS1_val; }	
-	uint32_t RS2_val_reg() { return RS2_val; }
-	uint8_t RD_reg() { return RD; }
-	uint16_t Imm1_reg() { return imm1; }
-	uint32_t Imm2_reg() { return imm2; }
+	uint8_t get_rs1() { return rs1; }	
+	uint8_t get_rs2() { return rs2; }
+	uint32_t get_rs1_val() { return rs1_val; }	
+	uint32_t get_rs2_val() { return rs2_val; }
+	uint8_t get_rd() { return rd; }
+	uint16_t get_imm1() { return imm1; }
+	uint32_t get_imm2() { return imm2; }
 
 	void print_reg();
 };
 
 class Execute_reg {
 	CU_signals CU_reg;
-	uint8_t RS1;
-	uint32_t RS1_val;
+	uint32_t rs2_val;
 	uint32_t ALUresult;
-	uint8_t RD;
+	uint8_t rd;
 
 public:
 	Execute_reg() {}
-	Execute_reg(CU_signals CU_val, uint8_t RS1_v, uint32_t RS1_vv, uint32_t ALUresult_val, uint8_t RD_val);
+	Execute_reg(CU_signals CU_, uint32_t rs2_, uint32_t ALUresult_, uint8_t rd_);
 
 	CU_signals get_CU_reg() { return CU_reg; }
-	uint8_t rs1_reg() { return RS1;	}
-	uint32_t rs1_val_reg() { return RS1_val; }
-	uint32_t ALUresult_reg() { return ALUresult; }
-	uint8_t RD_reg() { return RD; }
+	uint32_t get_rs2_val() { return rs2_val; }
+	uint32_t get_ALUresult() { return ALUresult; }
+	uint8_t get_rd() { return rd; }
 
 	void print_reg();
 };
@@ -90,14 +88,14 @@ public:
 class Memory_reg {
 	CU_signals CU_reg;
 	uint32_t mux_result;
-	uint8_t RD;
+	uint8_t rd;
 
 public:
-	Memory_reg(CU_signals CU_reg_val, uint32_t mux_result_val, uint8_t RD_val);
+	Memory_reg(CU_signals CU_reg, uint32_t mux_result, uint8_t rd);
 
 	CU_signals get_CU_reg() { return CU_reg; }
-	uint32_t mux_res() { return mux_result; }
-	uint8_t RD_reg() { return RD; }
+	uint32_t get_mux_res() { return mux_result; }
+	uint8_t get_rd() { return rd; }
 
 	void print_reg();
 };
@@ -107,13 +105,13 @@ public:
 //класс instn_Memory - хранит массив из 32 битных инструкций
 class Insn_data_memory {
 	std::vector<uint32_t> insn;
-	uint32_t m_regs[1000];
+	uint32_t m_regs[10000];
 
 public:
 	Insn_data_memory() {}
 
-	void set_instr(std::vector<uint32_t> insns) { insn = insns; }
-	uint32_t get_instruction(int PC) { return insn[PC]; }
+	void set_insn(std::vector<uint32_t> insns) { insn = insns; }
+	uint32_t get_insn(int PC) { return insn[PC]; }
 	void set_register(uint32_t reg, uint32_t A) { m_regs[A] = reg; }
 	uint32_t get_register(uint32_t reg) { return m_regs[reg]; }
 

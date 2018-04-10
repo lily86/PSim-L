@@ -2,19 +2,19 @@
 #include "stages.h"
 
 int main() {
-	std::vector<uint32_t> insns = { 0b00010010000010000011, // LW x1,x2,0
-									0b011111100111000010000101000000000,
-								    0b01000000100000001000101000011111,
-									0b1010101010010000110000100000011,
-									0b1010101010010000110000100000011,
-									0b0000000010010101100001000100001};
+	std::vector<uint32_t> insns = { 0b00000000000000010010000010000011, // LW x1,x2,0
+									0b00000000010100100000000110110011, // ADD x3,x4,x5
+								    0b00000000100100111000001101100011, // BEQ x7,x9,3
+									0b01000000101000110000001010110011, // SUB x5,x6,x10
+									0b00000000000010000110000100000011,
+									0b00000000010010101100001000100001};
 	//global instruction and data memory
 	Insn_data_memory instr_data_mem;
-	instr_data_mem.set_instr(insns);
+	instr_data_mem.set_insn(insns);
 	instr_data_mem.print_memory();
 
 	//global regfile
-	uint32_t regs[32] = {0, 2, 13, 64, 10, 8, 14, 76, 100, 7, 24, 4, 2, 6, 2, 5, 53, 63, 27, 47, 64, 94, 27, 26, 39, 3, 3, 0, 84, 24, 85, 3};
+	uint32_t regs[32] = {0, 2, 13, 64, 10, 8, 14, 76, 100, 76, 24, 4, 2, 6, 2, 5, 53, 63, 27, 47, 64, 94, 27, 26, 39, 3, 3, 0, 84, 24, 85, 3};
 	Regfile regfile(regs);
 	regfile.print_regfile();
 
@@ -36,7 +36,7 @@ int main() {
 		Decode_reg decode_reg = decode(fetch_reg, regfile);
 		decode_reg.print_reg();
 
-		Execute_reg execute_reg = execute(decode_reg, PC_DISP, PC_R);
+		Execute_reg execute_reg = execute(decode_reg, PC_DISP, PC_R, BP_EX, BP_MEM);
 		execute_reg.print_reg();
 
 		Memory_reg memory_reg = memory(execute_reg, instr_data_mem, BP_EX);
