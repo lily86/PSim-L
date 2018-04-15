@@ -105,7 +105,7 @@ void write_back(Memory_reg &reg, Regfile &regfile, uint32_t &BP_MEM) {
 
 	if (WB_WE_signal) {
 		regfile.set_register(WB_A, WB_D); // write to regfile only on signal
-		std::cout << "Wrote " << std::bitset<32>(regfile.get_register(WB_A)) << " to " << std::bitset<8>(WB_A) << std::endl; 
+		std::cout << "[reg]: " << std::bitset<8>(WB_A) << " -> " << std::bitset<32>(regfile.get_register(WB_A)) << std::endl; 
 	}
 }
 

@@ -30,11 +30,11 @@ int main() {
 	Execute_reg execute_reg;
 	Memory_reg memory_reg;
 
-	int N = 5; // number of cycles
+	int N = 10; // number of cycles
  
 	for (int i = 0; i < N; i++) {
 		printf("--------------------------------------------------------\n");
-		std::cout << "PC = " << PC << std::endl << std::endl;
+		std::cout << "PC = " << PC << std::endl;
 		std::cout << "cycle = " << i << std::endl << std::endl;
 
 		//Fetch stage
