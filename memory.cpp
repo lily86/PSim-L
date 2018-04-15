@@ -1,11 +1,12 @@
 #include "memory.h"
 
-uint32_t multiplexor4(uint32_t rs2_val, uint16_t imm1, uint32_t imm2, uint32_t rd, uint8_t mux_ex) {
+uint32_t multiplexor5(uint32_t rs2_val, Imm imm, uint32_t rd, uint8_t mux_ex) {
 	switch (mux_ex) {
 		case 0: return rs2_val;
-		case 1: return imm1;
-		case 2: return imm2;
-		case 3: return rd;
+		case 1: return imm.imm_I;
+		case 2: return imm.imm_S;
+		case 3: return imm.imm_B;
+		case 4: return rd;
 	}
 }
 
@@ -21,16 +22,6 @@ uint32_t get_bits(uint32_t insn, unsigned int pos, unsigned int n) {
 int32_t sign_extend(uint32_t insn) {
 	if (get_bits(insn, 31, 1)) return 0x1FFFFF;
 	return 0;
-
-/*	std::cout << "instrusction " << std::bitset<32>(insn) << std::endl;
-	uint16_t number_register = insn>>20;
-	//std::cout <<std::bitset<16>(number_register) <<std::endl;
-	uint32_t tmp = 0;	
-	uint8_t get_higher_bit = number_register >> 11;
-	//std::cout<<std::bitset<8>(get_higher_bit)<<std::endl;
-	if (get_higher_bit) tmp = number_register | 0xFFFFF000;
-	else tmp = number_register;
-	return tmp; */
 }
 
 // concrete?
