@@ -5,7 +5,15 @@
 #include <vector>
 #include <bitset>
 
-uint32_t multiplexor4(uint32_t rs2_val, uint16_t imm1, uint32_t imm2, uint32_t rd, uint8_t mux_ex); // зачем RD ???
+struct Imm {
+	uint16_t imm_I;
+	uint16_t imm_S;
+	uint16_t imm_B;
+/*	uint32_t imm_U;
+	uint32_t imm_J;*/
+};
+
+uint32_t multiplexor5(uint32_t rs2_val, Imm imm, uint32_t rd, uint8_t mux_ex); // зачем RD ???
 int8_t multiplexor(int8_t lorD);
 uint32_t get_bits(uint32_t insn, unsigned int pos, unsigned int n);
 int32_t sign_extend(uint32_t insn);
@@ -35,7 +43,9 @@ class Fetch_reg {
 	uint32_t reg;
 
 public:
+	Fetch_reg() {}
 	Fetch_reg(uint32_t val) { reg = val; }
+	
 	uint32_t get_reg() { return reg; }
 
 	void print_reg();
@@ -52,6 +62,7 @@ class Decode_reg {
 	uint8_t rd;
 
 public:
+	Decode_reg() {}
 	Decode_reg(CU_signals CU_reg_, uint8_t rs1_, uint8_t rs2_, uint32_t rs1_val_, 
 			   uint32_t rs2_val_, uint8_t rd_, uint16_t imm1_, uint32_t imm2_);
 
@@ -91,6 +102,7 @@ class Memory_reg {
 	uint8_t rd;
 
 public:
+	Memory_reg() {}
 	Memory_reg(CU_signals CU_reg, uint32_t mux_result, uint8_t rd);
 
 	CU_signals get_CU_reg() { return CU_reg; }
@@ -113,7 +125,7 @@ public:
 	void set_insn(std::vector<uint32_t> insns) { insn = insns; }
 	uint32_t get_insn(int PC) { return insn[PC]; }
 	void set_register(uint32_t reg, uint32_t A) { m_regs[A] = reg; }
-	uint32_t get_register(uint32_t reg) { return m_regs[reg]; }
+	uint32_t get_register(uint32_t reg) { return insn[reg]; }
 
 	void print_memory();
 };
