@@ -122,8 +122,8 @@ class Insn_data_memory {
 public:
 	Insn_data_memory() {}
 
-	void set_insn(std::vector<uint32_t>& insns) { insn = insns; }
-	uint32_t get_insn(uint32_t PC) { return insn[PC]; }
+	void set_insn(std::vector<uint32_t> insns) { insn = insns; }
+	uint32_t get_insn(int PC) { return insn[PC]; }
 	void set_register(uint32_t reg, uint32_t A) { insn[A] = reg; }
 	uint32_t get_register(uint32_t reg) { return insn[reg]; }
 
