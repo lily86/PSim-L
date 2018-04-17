@@ -1,9 +1,10 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <iostream>
-#include <vector>
 #include <bitset>
+#include <iostream>
+#include <fstream>
+#include <vector>
 
 struct Imm {
 	uint16_t imm_I;
@@ -43,7 +44,7 @@ class Fetch_reg {
 	uint32_t reg;
 
 public:
-	Fetch_reg() {}
+	Fetch_reg() : reg(0) {}
 	Fetch_reg(uint32_t val) { reg = val; }
 	
 	uint32_t get_reg() { return reg; }
@@ -62,7 +63,7 @@ class Decode_reg {
 	uint8_t rd;
 
 public:
-	Decode_reg() {}
+	Decode_reg() : rs1(0), rs2(0), rs1_val(0), rs2_val(0), imm1(0), imm2(0), rd(0) {}
 	Decode_reg(CU_signals CU_reg_, uint8_t rs1_, uint8_t rs2_, uint32_t rs1_val_, 
 			   uint32_t rs2_val_, uint8_t rd_, uint16_t imm1_, uint32_t imm2_);
 
@@ -85,7 +86,7 @@ class Execute_reg {
 	uint8_t rd;
 
 public:
-	Execute_reg() {}
+	Execute_reg() : rs2_val(0), ALUresult(0), rd(0) {}
 	Execute_reg(CU_signals CU_, uint32_t rs2_, uint32_t ALUresult_, uint8_t rd_);
 
 	CU_signals get_CU_reg() { return CU_reg; }
@@ -102,7 +103,7 @@ class Memory_reg {
 	uint8_t rd;
 
 public:
-	Memory_reg() {}
+	Memory_reg() : mux_result(0), rd(0) {}
 	Memory_reg(CU_signals CU_reg, uint32_t mux_result, uint8_t rd);
 
 	CU_signals get_CU_reg() { return CU_reg; }
@@ -121,8 +122,8 @@ class Insn_data_memory {
 public:
 	Insn_data_memory() {}
 
-	void set_insn(std::vector<uint32_t> insns) { insn = insns; }
-	uint32_t get_insn(int PC) { return insn[PC]; }
+	void set_insn(std::vector<uint32_t>& insns) { insn = insns; }
+	uint32_t get_insn(uint32_t PC) { return insn[PC]; }
 	void set_register(uint32_t reg, uint32_t A) { insn[A] = reg; }
 	uint32_t get_register(uint32_t reg) { return insn[reg]; }
 
@@ -136,7 +137,7 @@ public:
 	Regfile() {}
   	Regfile(uint32_t regs[32]);
 	
-	int32_t get_register(uint32_t number_register) { return m_regs[number_register]; }
+	uint32_t get_register(uint32_t number_register) { return m_regs[number_register]; }
 	void set_register(uint8_t number_register, uint32_t word) { m_regs[number_register] = word; }
 
 	void print_regfile();

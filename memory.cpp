@@ -61,12 +61,17 @@ CU_signals control_unit(uint32_t insn) {
 
 	CU_signals signals;
 
+	std::ofstream fout("log.txt");
+
 	if (opcode == 0b0110011) { // R-type
 		switch (funct7) { // if funct7 = 01 - substitution , AluOp = 1
 			case 0b0100000 : signals.set_sginals(1,0,0,1,1,0); // SUB
+    						 fout << "SUB x" << (int) get_bits(insn, 7, 5) << ", x" << (int)get_bits(insn, 15, 5) << ", x" << (int)get_bits(insn, 19, 5) << "\n";
 							 std::cout << "SUB" << std::endl << std::endl;
 							 break;
 			case 0b0000000 : signals.set_sginals(1,0,0,0,1,0); // ADD
+     						 fout << "ADD x" << (int) get_bits(insn, 7, 5) << ", x" << (int)get_bits(insn, 15, 5) << ", x" << (int)get_bits(insn, 19, 5) << "\n";
+							 fout << "ADD";
 							 std::cout << "ADD" << std::endl << std::endl;
 							 break;
 		}
@@ -74,16 +79,21 @@ CU_signals control_unit(uint32_t insn) {
 	// HOWTO?
 	else if (opcode == 0b0000011) { // I-type
 		signals.set_sginals(1,0,1,0,0,0); // LW
+		fout << "LW x" << (int)get_bits(insn, 7, 5) << ", x" << (int)get_bits(insn, 15, 5) << ", " << (int)get_bits(insn, 20, 12) << "\n";
 		std::cout << "LOAD" << std::endl << std::endl;
 	}
 	else if (opcode == 0b0100011) { // S-type
 		signals.set_sginals(0,1,2,0,0,0); // SW
+		fout << "SW x" << (int)get_bits(insn, 7, 5) << ", x" << (int)get_bits(insn, 15, 5) << ", " << (int)get_bits(insn, 20, 12) << "\n";		
 		std::cout << "STORE" << std::endl << std::endl;
 	}
 	else if (opcode == 0b1100011) { // B-type
 		signals.set_sginals(0,0,0,0,0,1); // BEQ
+		//fout << "BEQ" << "\n";
 		std::cout << "BRANCH" << std::endl << std::endl;
 	}
+
+	fout.close();
 	return signals;
 }
 //---------------------------------------------------------------------------------------------------------------
