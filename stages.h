@@ -50,9 +50,9 @@ Execute_reg execute(Decode_reg &reg, uint32_t &PC_DISP, uint8_t &PC_R, uint32_t 
 	uint32_t imm_input = imm2 >> 31 | imm1; // imm
 	struct Imm imm;
 	imm.imm_I = get_bits(imm_input, 20, 12);
-	imm.imm_S = get_bits(imm_input, 25, 7) >> 25 | get_bits(imm_input, 7, 5);
-	imm.imm_B = get_bits(imm_input, 31, 1) >> 31 | get_bits(imm_input, 7, 1) >> 7 |
-				get_bits(imm_input, 25, 6) >> 25 | get_bits(imm_input, 8, 4) >> 8;
+	imm.imm_S = get_bits(imm_input, 25, 7) << 5 | get_bits(imm_input, 7, 5);
+	imm.imm_B = get_bits(imm_input, 31, 1) << 12 | get_bits(imm_input, 7, 1) << 11 |
+				get_bits(imm_input, 25, 6) << 5 | get_bits(imm_input, 8, 4) << 1;
 	/*imm.imm_U = get_bits(imm_input, 20, 12);
 	imm.imm_J = get_bits(imm_input, 31, 1) >> 31 | get_bits(imm_input, 12, 8) >> 12 |
 				get_bits(imm_input, 20, 1) >> 20 | get_bits(imm_input, 21, 10);*/
@@ -98,6 +98,12 @@ Memory_reg memory(Execute_reg &reg, Insn_data_memory &mem, uint32_t &BP_EX) {
 void write_back(Memory_reg &reg, Regfile &regfile, uint32_t &BP_MEM) {
 	CU_signals CU = reg.get_CU_reg(); // get signals
 	uint8_t WB_WE_signal = CU.WB_WE;
+	uint8_t STOP_signal = CU.stop;
+
+	if (STOP_signal == 1) {
+		std::cout << "STOP PIPELINE!" << std::endl << std::endl;
+		exit(-1);
+	}
 
 	uint32_t WB_D = reg.get_mux_res(); // set signals
 	BP_MEM = reg.get_mux_res();
