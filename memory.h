@@ -7,11 +7,11 @@
 #include <vector>
 
 struct Imm {
-	uint16_t imm_I;
-	uint16_t imm_S;
-	uint16_t imm_B;
-/*	uint32_t imm_U;
-	uint32_t imm_J;*/
+	uint32_t imm_I;
+	uint32_t imm_S;
+	uint32_t imm_B;
+	uint32_t imm_U;
+	uint32_t imm_J;
 };
 
 uint32_t multiplexor5(uint32_t rs2_val, Imm imm, uint32_t rd, uint8_t mux_ex); // зачем RD ???
@@ -23,16 +23,18 @@ int32_t alu(int ALUOp, uint32_t a, uint32_t b);
 struct CU_signals {
 	uint8_t WB_WE = 0;
 	uint8_t MEM_WE = 0;
-	uint8_t mux_ex1 = 0;
+	uint8_t mux_ex = 0;
 	uint8_t AluOp = 0;
-	uint8_t mux_mem1 = 0;
+	uint8_t mux_mem = 0;
 	uint8_t conditional = 0;
 	uint8_t stop = 0;
 
+	uint8_t mux_pc = 0;
+
 	CU_signals() {}
 
-	void set_signals(uint8_t WB_WE_, uint8_t MEM_WE_, uint8_t mux_ex1_,
-					 uint8_t AluOp_, uint8_t mux_mem1_, uint8_t conditional_, uint8_t stop_);
+	void set_signals(uint8_t WB_WE_, uint8_t MEM_WE_, uint8_t mux_ex_,
+					 uint8_t AluOp_, uint8_t mux_mem_, uint8_t conditional_, uint8_t stop_, uint8_t mux_pc_);
 
 	void print_CU_signals();
 };
@@ -43,14 +45,17 @@ struct CU_signals control_unit(uint32_t insn);
 
 class Fetch_reg {
 	uint32_t reg;
+	uint32_t local_PC;
 
 public:
-	Fetch_reg() : reg(0) {}
-	Fetch_reg(uint32_t val) { reg = val; }
+	Fetch_reg() : reg(0), local_PC(0) {}
+	Fetch_reg(uint32_t reg_, uint32_t local_PC_) { reg = reg_, local_PC = local_PC_; }
 	
 	uint32_t get_reg() { return reg; }
+	uint32_t get_local_PC() { return local_PC; }
 
 	void print_reg();
+	void print_local_PC();
 };
 
 class Decode_reg {
@@ -63,10 +68,13 @@ class Decode_reg {
 	uint32_t imm2; //31
 	uint8_t rd;
 
+	uint32_t local_PC;
+	uint8_t funct3;
+
 public:
-	Decode_reg() : rs1(0), rs2(0), rs1_val(0), rs2_val(0), imm1(0), imm2(0), rd(0) {}
+	Decode_reg() : rs1(0), rs2(0), rs1_val(0), rs2_val(0), imm1(0), imm2(0), rd(0), local_PC(0), funct3(0) {}
 	Decode_reg(CU_signals CU_reg_, uint8_t rs1_, uint8_t rs2_, uint32_t rs1_val_, 
-			   uint32_t rs2_val_, uint8_t rd_, uint16_t imm1_, uint32_t imm2_);
+			   uint32_t rs2_val_, uint8_t rd_, uint16_t imm1_, uint32_t imm2_, uint32_t local_PC_, uint8_t funct3);
 
 	CU_signals get_CU_reg() { return CU_reg; }	
 	uint8_t get_rs1() { return rs1; }	
@@ -76,6 +84,8 @@ public:
 	uint8_t get_rd() { return rd; }
 	uint16_t get_imm1() { return imm1; }
 	uint32_t get_imm2() { return imm2; }
+	uint32_t get_local_PC() { return local_PC; }
+	uint8_t get_funct3() { return funct3; }
 
 	void print_reg();
 };
