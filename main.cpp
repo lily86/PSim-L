@@ -19,6 +19,8 @@ int main()
     if (!er.Load(insns, va, pc))
     	std::cout<<"ERROR"<<std::endl;
 
+    // std::vector<uint32_t> insns = { 00000000000000000001001010010111 };
+
 
     //std::cout<<"CMD SIZE IS: "<<insns.size()<<std::endl;
     #if 0
@@ -68,7 +70,7 @@ int main()
 	Execute_reg execute_reg;
 	Memory_reg memory_reg;
 
-	int N = 6000;
+	int N = 100;
 	 // number of cycles
 	for (int i = 0; i < N; i++) {
 		printf("--------------------------------------------------------\n");

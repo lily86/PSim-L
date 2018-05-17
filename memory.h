@@ -30,11 +30,12 @@ struct CU_signals {
 	uint8_t stop = 0;
 
 	uint8_t mux_pc = 0;
+	uint8_t check_J = 0;
 
 	CU_signals() {}
 
 	void set_signals(uint8_t WB_WE_, uint8_t MEM_WE_, uint8_t mux_ex_,
-					 uint8_t AluOp_, uint8_t mux_mem_, uint8_t conditional_, uint8_t stop_, uint8_t mux_pc_);
+					 uint8_t AluOp_, uint8_t mux_mem_, uint8_t conditional_, uint8_t stop_, uint8_t mux_pc_, uint8_t check_J_);
 
 	void print_CU_signals();
 };

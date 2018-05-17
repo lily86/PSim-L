@@ -39,11 +39,12 @@ int32_t alu(int ALUOp, uint32_t a, uint32_t b) {
 		case 8: return a < b;
 		case 9: return a << b;
 		case 10: return a >> b;
+		case 11: return a + 1;
 	}
 }
 
 void CU_signals::set_signals(uint8_t WB_WE_, uint8_t MEM_WE_, uint8_t mux_ex_,
-							 uint8_t AluOp_, uint8_t mux_mem_, uint8_t conditional_, uint8_t stop_, uint8_t mux_pc_) {
+							 uint8_t AluOp_, uint8_t mux_mem_, uint8_t conditional_, uint8_t stop_, uint8_t mux_pc_, uint8_t check_J_) {
 	WB_WE = WB_WE_;
 	MEM_WE = MEM_WE_;
 	mux_ex = mux_ex_;
@@ -52,6 +53,7 @@ void CU_signals::set_signals(uint8_t WB_WE_, uint8_t MEM_WE_, uint8_t mux_ex_,
 	conditional = conditional_;
 	stop = stop_;
 	mux_pc = mux_pc_;
+	check_J = check_J_;
 }
 
 void CU_signals::print_CU_signals() {
@@ -64,6 +66,7 @@ void CU_signals::print_CU_signals() {
 	std::cout << "  conditional: " << std::bitset<1>(conditional) << std::endl;
 	std::cout << "  stop:        " << std::bitset<1>(stop) << std::endl;
 	std::cout << "  mux_pc:      " << std::bitset<1>(mux_pc) << std::endl;
+	std::cout << "  check_J:     " << std::bitset<1>(check_J) << std::endl;
 }
 
 CU_signals control_unit(uint32_t insn) {
@@ -79,39 +82,39 @@ CU_signals control_unit(uint32_t insn) {
 	if (opcode == 0b0110011) { // R-type, (ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND)
 		switch (funct3) { 
 			case 0b000 : if (funct7 == 0b0000000) {
-							signals.set_signals(1,0,0,0,1,0,0,0); 		  // ADD rd,rs1,rs2
+							signals.set_signals(1,0,0,0,1,0,0,0,0); 		  // ADD rd,rs1,rs2
      						//fout << "ADD x" << (int) get_bits(insn, 7, 5) << ", x" << (int)get_bits(insn, 15, 5) << ", x" << (int)get_bits(insn, 19, 5) << "\n";
 							std::cout << "ADD" << std::endl << std::endl;
 						 } else if (funct7 == 0b0100000) {
-						 	signals.set_signals(1,0,0,1,1,0,0,0); 		  // SUB rd,rs1,rs2 
+						 	signals.set_signals(1,0,0,1,1,0,0,0,0); 		  // SUB rd,rs1,rs2 
     						//fout << "SUB x" << (int) get_bits(insn, 7, 5) << ", x" << (int)get_bits(insn, 15, 5) << ", x" << (int)get_bits(insn, 19, 5) << "\n";
 							std::cout << "SUB" << std::endl << std::endl;
 						 }
 						 break;
-			case 0b001 : signals.set_signals(1,0,0,9,1,0,0,0); 			  // SLL rd,rs1,rs2	     rd ← ux(rs1) « rs2
+			case 0b001 : signals.set_signals(1,0,0,9,1,0,0,0,0); 			  // SLL rd,rs1,rs2	     rd ← ux(rs1) « rs2
 						 std::cout << "SLL" << std::endl << std::endl;
 						 break;
-			case 0b010 : signals.set_signals(1,0,0,8,1,0,0,0); 			  // SLT rd,rs1,rs2	     rd ← sx(rs1) < sx(rs2)
+			case 0b010 : signals.set_signals(1,0,0,8,1,0,0,0,0); 			  // SLT rd,rs1,rs2	     rd ← sx(rs1) < sx(rs2)
 						 std::cout << "SLT" << std::endl << std::endl;
 						 break;
-			case 0b011 : signals.set_signals(1,0,0,8,1,0,0,0);			  // SLTU rd,rs1,rs2     rd ← ux(rs1) < ux(rs2)
+			case 0b011 : signals.set_signals(1,0,0,8,1,0,0,0,0);			  // SLTU rd,rs1,rs2     rd ← ux(rs1) < ux(rs2)
 						 std::cout << "SLTU" << std::endl << std::endl;
 						 break;
-			case 0b100 : signals.set_signals(1,0,0,6,1,0,0,0);
+			case 0b100 : signals.set_signals(1,0,0,6,1,0,0,0,0);
 						 std::cout << "XOR" << std::endl << std::endl;
 						 break;
 			case 0b101 : if (funct7 == 0b0000000) {
-							signals.set_signals(1,0,0,10,1,0,0,0);
+							signals.set_signals(1,0,0,10,1,0,0,0,0);
 						 	std::cout << "SRL" << std::endl << std::endl; // SRL rd,rs1,rs2	     rd ← ux(rs1) » rs2
 						 } else if (funct7 == 0b0100000) {
-						 	signals.set_signals(1,0,0,10,1,0,0,0);
+						 	signals.set_signals(1,0,0,10,1,0,0,0,0);
 						 	std::cout << "SRA" << std::endl << std::endl; // SRA rd,rs1,rs2	     rd ← sx(rs1) » rs2
  						 }
  						 break;
-			case 0b110 : signals.set_signals(1,0,0,7,1,0,0,0);
+			case 0b110 : signals.set_signals(1,0,0,7,1,0,0,0,0);
 						 std::cout << "OR" << std::endl << std::endl; 	  // OR rd,rs1,rs2       rd ← ux(rs1) ∨ ux(rs2)
 						 break;
-			case 0b111 : signals.set_signals(1,0,0,5,1,0,0,0);
+			case 0b111 : signals.set_signals(1,0,0,5,1,0,0,0,0);
 						 std::cout << "AND" << std::endl << std::endl;	  // AND rd,rs1,rs2      rd ← ux(rs1) ∧ ux(rs2)
 						 break;
 		}
@@ -126,42 +129,42 @@ CU_signals control_unit(uint32_t insn) {
 	}*/
 	else if (opcode == 0b0000011) { // I-type (LB, LH, LW, LBU, LHU)
 		switch (funct3) { 	// WB_WE = 1 (write to register), mux_mem = 0 (write from memory)
-			case 0b000: signals.set_signals(1,0,1,0,0,0,0,0); 			  // LB rd,offset(rs1)	 rd ← s8[rs1 + offset]
+			case 0b000: signals.set_signals(1,0,1,0,0,0,0,0,0); 			  // LB rd,offset(rs1)	 rd ← s8[rs1 + offset]
 						//fout << "LW x" << (int)get_bits(insn, 7, 5) << ", x" << (int)get_bits(insn, 15, 5) << ", " << (int)get_bits(insn, 20, 12) << "\n";
 						std::cout << "LB" << std::endl << std::endl;
 						break;
-			case 0b001: signals.set_signals(1,0,1,0,0,0,0,0); 			  // LH rd,offset(rs1)	 rd ← s16[rs1 + offset]
+			case 0b001: signals.set_signals(1,0,1,0,0,0,0,0,0); 			  // LH rd,offset(rs1)	 rd ← s16[rs1 + offset]
 						std::cout << "LH" << std::endl << std::endl;
 						break;
-			case 0b010: signals.set_signals(1,0,1,0,0,0,0,0); 			  // LW rd,offset(rs1)	 rd ← s32[rs1 + offset]
+			case 0b010: signals.set_signals(1,0,1,0,0,0,0,0,0); 			  // LW rd,offset(rs1)	 rd ← s32[rs1 + offset]
 						std::cout << "LW" << std::endl << std::endl;
 						break;
-			case 0b100: signals.set_signals(1,0,1,0,0,0,0,0); 			  // LBU rd,offset(rs1)	 rd ← u8[rs1 + offset]
+			case 0b100: signals.set_signals(1,0,1,0,0,0,0,0,0); 			  // LBU rd,offset(rs1)	 rd ← u8[rs1 + offset]
 						std::cout << "LBU" << std::endl << std::endl;
 						break;
-			case 0b101: signals.set_signals(1,0,1,0,0,0,0,0); 			  // LHU rd,offset(rs1)	 rd ← u16[rs1 + offset]
+			case 0b101: signals.set_signals(1,0,1,0,0,0,0,0,0); 			  // LHU rd,offset(rs1)	 rd ← u16[rs1 + offset]
 						std::cout << "LHU" << std::endl << std::endl;
 						break;
 		}
 	}
 	else if (opcode == 0b0010011) { // I-type (ADDI, SLTI, SLTIU, XORI, ORI, ANDI)
 		switch (funct3) { 	// WB_WE = 1 (write to register), mux_mem = 1 (write from ALU)
-			case 0b000: signals.set_signals(1,0,1,0,1,0,0,0);
+			case 0b000: signals.set_signals(1,0,1,0,1,0,0,0,0);
 						std::cout << "ADDI" << std::endl << std::endl;
 						break;
-			case 0b010: signals.set_signals(1,0,1,8,1,0,0,0);           // SLTI rd,rs1,imm     rd ← sx(rs1) < sx(imm)
+			case 0b010: signals.set_signals(1,0,1,8,1,0,0,0,0);           // SLTI rd,rs1,imm     rd ← sx(rs1) < sx(imm)
 						std::cout << "SLTI" << std::endl << std::endl;
 						break;
-			case 0b011: signals.set_signals(1,0,1,8,1,0,0,0); 			// SLTIU rd,rs1,imm    rd ← sx(rs1) < sx(imm)
+			case 0b011: signals.set_signals(1,0,1,8,1,0,0,0,0); 			// SLTIU rd,rs1,imm    rd ← sx(rs1) < sx(imm)
 						std::cout << "SLTIU" << std::endl << std::endl;
 						break;
-			case 0b100: signals.set_signals(1,0,1,6,1,0,0,0); 			// XORI rd,rs1,imm     rd ← ux(rs1) ⊕ ux(imm)
+			case 0b100: signals.set_signals(1,0,1,6,1,0,0,0,0); 			// XORI rd,rs1,imm     rd ← ux(rs1) ⊕ ux(imm)
 						std::cout << "XORI" << std::endl << std::endl;
 						break;
-			case 0b110: signals.set_signals(1,0,1,7,1,0,0,0); 			// ORI rd,rs1,imm      rd ← ux(rs1) ∨ ux(imm)
+			case 0b110: signals.set_signals(1,0,1,7,1,0,0,0,0); 			// ORI rd,rs1,imm      rd ← ux(rs1) ∨ ux(imm)
 						std::cout << "ORI" << std::endl << std::endl;
 						break;
-			case 0b111: signals.set_signals(1,0,1,5,1,0,0,0); 			// ANDI rd,rs1,imm     rd ← ux(rs1) ∧ ux(imm)
+			case 0b111: signals.set_signals(1,0,1,5,1,0,0,0,0); 			// ANDI rd,rs1,imm     rd ← ux(rs1) ∧ ux(imm)
 						std::cout << "ANDI" << std::endl << std::endl;
 						break;
 		}
@@ -169,14 +172,14 @@ CU_signals control_unit(uint32_t insn) {
 	// S-type: MEM_WE = 1, mux_ex = 2 (imm_S)
 	else if (opcode == 0b0100011) { // S-type (SB, SH, SW)
 		switch (funct3) {
-			case 0b000:	signals.set_signals(0,1,2,0,0,0,0,0);			// SB rs2,offset(rs1)  u8[rs1 + offset] ← rs2
+			case 0b000:	signals.set_signals(0,1,2,0,0,0,0,0,0);			// SB rs2,offset(rs1)  u8[rs1 + offset] ← rs2
 						//fout << "SW x" << (int)get_bits(insn, 7, 5) << ", x" << (int)get_bits(insn, 15, 5) << ", " << (int)get_bits(insn, 20, 12) << "\n";
 						std::cout << "SB" << std::endl << std::endl;
 						break;
-			case 0b001: signals.set_signals(0,1,2,0,0,0,0,0);			// SH rs2,offset(rs1)  u16[rs1 + offset] ← rs2
+			case 0b001: signals.set_signals(0,1,2,0,0,0,0,0,0);			// SH rs2,offset(rs1)  u16[rs1 + offset] ← rs2
 						std::cout << "SH" << std::endl << std::endl;
 						break;
-			case 0b010: signals.set_signals(0,1,2,0,0,0,0,0);			// SW rs2,offset(rs1)  u32[rs1 + offset] ← rs2
+			case 0b010: signals.set_signals(0,1,2,0,0,0,0,0,0);			// SW rs2,offset(rs1)  u32[rs1 + offset] ← rs2
 						std::cout << "SW" << std::endl << std::endl;
 						break;
 		}
@@ -184,41 +187,45 @@ CU_signals control_unit(uint32_t insn) {
 	// B-type: conditional = 1, mux_ex = 3 (imm_B)
 	else if (opcode == 0b1100011) { // B-type (BEQ, BNE, BLT, BGE, BLTU, BGEU)
 		switch (funct3) {
-			case 0b000: signals.set_signals(0,0,3,0,0,1,0,0); 			// BEQ rs1,rs2,offset	if rs1 = rs2 then pc ← pc + offset
+			case 0b000: signals.set_signals(0,0,3,0,0,1,0,0,0); 			// BEQ rs1,rs2,offset	if rs1 = rs2 then pc ← pc + offset
 						//fout << "BEQ" << "\n";
 						std::cout << "BEQ" << std::endl << std::endl;
 						break;
-			case 0b001: signals.set_signals(0,0,3,0,0,1,0,0); 			// BNE rs1,rs2,offset	if rs1 ≠ rs2 then pc ← pc + offset
+			case 0b001: signals.set_signals(0,0,3,0,0,1,0,0,0); 			// BNE rs1,rs2,offset	if rs1 ≠ rs2 then pc ← pc + offset
 						std::cout << "BNE" << std::endl << std::endl;
 						break;
-			case 0b100: signals.set_signals(0,0,3,0,0,1,0,0); 			// BLT rs1,rs2,offset	if rs1 < rs2 then pc ← pc + offset
+			case 0b100: signals.set_signals(0,0,3,0,0,1,0,0,0); 			// BLT rs1,rs2,offset	if rs1 < rs2 then pc ← pc + offset
 						std::cout << "BLT" << std::endl << std::endl;
 						break;
-			case 0b101: signals.set_signals(0,0,3,0,0,1,0,0); 			// BGE rs1,rs2,offset	if rs1 ≥ rs2 then pc ← pc + offset
+			case 0b101: signals.set_signals(0,0,3,0,0,1,0,0,0); 			// BGE rs1,rs2,offset	if rs1 ≥ rs2 then pc ← pc + offset
 						std::cout << "BGE" << std::endl << std::endl;
 						break;
-			case 0b110: signals.set_signals(0,0,3,0,0,1,0,0); 			// BLTU rs1,rs2,offset	if rs1 < rs2 then pc ← pc + offset
+			case 0b110: signals.set_signals(0,0,3,0,0,1,0,0,0); 			// BLTU rs1,rs2,offset	if rs1 < rs2 then pc ← pc + offset
 						std::cout << "BLTU" << std::endl << std::endl;
 						break;
-			case 0b111: signals.set_signals(0,0,3,0,0,1,0,0); 			// BGEU rs1,rs2,offset	if rs1 ≥ rs2 then pc ← pc + offset
+			case 0b111: signals.set_signals(0,0,3,0,0,1,0,0,0); 			// BGEU rs1,rs2,offset	if rs1 ≥ rs2 then pc ← pc + offset
 						std::cout << "BGEU" << std::endl << std::endl;
 						break;
 		}
 	}
 	// U-type: // WB_WE = 1 (write to registers), mux_ex = 5 (imm_U), ALuOp = 4 (do nothing)
 	else if (opcode == 0b0110111) { 									// LUI rd,imm    	 	rd ← imm
-		signals.set_signals(1,0,5,4,1,0,0,0);
+		signals.set_signals(1,0,5,4,1,0,0,0,0);
 		std::cout << "LUI" << std::endl << std::endl;
 	}
 	else if (opcode == 0b0010111) { 									// AUIPC rd,offset      rd ← pc + offset
-		signals.set_signals(1,0,5,0,1,0,0,1); // mux_pc = 1 (add to pc), ALuOp = 0 (add)
+		signals.set_signals(1,0,5,0,1,0,0,1,0); // mux_pc = 1 (add to pc), ALuOp = 0 (add)
 		std::cout << "AUIPC" << std::endl << std::endl;		
 	}
-	/*else if (opcode == 0b) { // J-type
-
-	}*/
+	// J-type
+	//  WB_WE_ 0, MEM_WE_ 0, mux_ex_ 5, AluOp_ 0, mux_mem_ 1, conditional_ 0, stop_ 0, pc 0
+	else if (opcode == 0b1101111) {
+		signals.set_signals(1,0,6,11,1,1,0,1,1);
+		std::cout << "JAL" << std::endl << std::endl;					// JAL rd,offset     rd ← pc + length(inst)
+																		// 					 pc ← pc + offset
+	}
 	else if (opcode == 0b1111111) { 									// STOP
-		signals.set_signals(0,0,0,0,0,0,1,0);
+		signals.set_signals(0,0,0,0,0,0,1,0,0);
 		std::cout << "STOP" << std::endl << std::endl;
 	}
 

@@ -58,6 +58,7 @@ Execute_reg execute(Decode_reg &reg, uint32_t &PC_DISP, uint8_t &PC_R, uint32_t 
 	uint8_t mux_ex = CU.mux_ex;
 	uint8_t conditional = CU.conditional;
 	uint8_t mux_pc = CU.mux_pc;
+	uint8_t check_J = CU.check_J;
 
 	uint32_t rs1_val = reg.get_rs1_val(); // get data // !!!!!!!!!!!!!!! 32
 	uint32_t rs2_val = reg.get_rs2_val(); // !!!!!!!!!!!!!!!!!!!!!!!!!!! 32
@@ -77,7 +78,7 @@ Execute_reg execute(Decode_reg &reg, uint32_t &PC_DISP, uint8_t &PC_R, uint32_t 
 	imm.imm_S = imm2 | ((get_bits(imm1,5,6) << 5 ) | rd);
 	imm.imm_B = imm2 | ((get_bits(rd,1,4) | get_bits(imm1,5,5) << 4 | get_bits(imm1,10,1) << 9 | get_bits(imm2,31,1) << 10 ));
 	imm.imm_U = imm1 << 8 | rs1 << 3 | funct3;
-	//imm.imm_J = ;
+	imm.imm_J = funct3 | rs1 << 3 | get_bits(imm1,10,1) << 8 | get_bits(imm1,0,9) << 9 | get_bits(imm2,31,1) << 19;
 	std::cout<<"immidiate B is: "<<std::bitset<32>(imm.imm_B)<<std::endl;
 
 	// extra multiplexor and signal for choosing between rs1_val or PC !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -95,6 +96,10 @@ Execute_reg execute(Decode_reg &reg, uint32_t &PC_DISP, uint8_t &PC_R, uint32_t 
 		PC_R = 1;
 		branch = 1;
 		std::cout << "it is a branch" << std::endl;
+	} else if (check_J == 1) {
+		PC_R = 1;
+		branch = 1;
+		std::cout << "it is a JAL" << std::endl;
 	}
 	else PC_R = 0;
 
